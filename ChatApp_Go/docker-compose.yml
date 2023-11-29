@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+    redis:
+        container_name: 'redis'
+        image: redis
+    server:
+        container_name: 'server'
+        build:
+            context: './server'
+        env_file:
+            - './server/.env'
+        ports:
+            - '3001:3001'
+        # The entire folder as a bind mount.
+        # Only for development purposes.
+        volumes:
+            - './server:/usr/src/app:ro'
+        # Only start the server's container after
+        # Redis has started.
+        depends_on:
+            - redis
+    client:
+        container_name: 'client'
+        build:
+            context: './client'
+        ports:
+            - '3000:5173'
+        volumes:
+            - './client/src:/app/src:ro'
+            - '/app/node_modules'
+        depends_on:
+            - server
+        stdin_open: true
+        tty: true
